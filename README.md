@@ -1,5 +1,7 @@
 # Share Anything plugin
 
+Original: [d-silveira/flutter-share](https://github.com/d-silveira/flutter-share)
+
 A Flutter plugin to share content from your Flutter app via the platform's share dialog and receive shares from other apps on the platform (currently only on Android).  
 
 Wraps the ACTION_SEND Intent, and ACTION_SEND + ACTION_SEND_MULTIPLE IntentReceiver on Android
@@ -13,7 +15,7 @@ To use this plugin
 ```
  share:
     git:
-     url: https://github.com/d-silveira/flutter-share.git
+     url: https://github.com/seiyial/flutter-share.git
 ```
  as a [dependency in your pubspec.yaml file](https://flutter.io/platform-plugins/).
 
