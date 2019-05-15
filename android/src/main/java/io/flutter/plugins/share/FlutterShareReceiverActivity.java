@@ -91,6 +91,8 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 		String type = intent.getType();
 
 		if (Intent.ACTION_SEND.equals(action) && type != null) {
+			
+			// Handler for text/plain types
 			if ("text/plain".equals(type)) {
 				String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
 				Log.i(getClass().getSimpleName(), "receiving shared title: " + sharedTitle);
@@ -100,6 +102,7 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 					Map<String, String> params = new HashMap<>();
 					params.put(TYPE, type);
 					params.put(TEXT, sharedText);
+					params.put(FILE, data);
 					if (!TextUtils.isEmpty(sharedTitle)) {
 						params.put(TITLE, sharedTitle);
 					}
@@ -107,15 +110,22 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 				} else if (!ignoring && !backlog.contains(intent)) {
 					backlog.add(intent);
 				}
+			
+			// Handler for all other types
 			} else {
 				String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
 				Log.i(getClass().getSimpleName(), "receiving shared title: " + sharedTitle);
 				Uri sharedUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
 				Log.i(getClass().getSimpleName(), "receiving shared file: " + sharedUri);
+				String sharedFilePath = intent.getData().toString();
+				if (sharedFilePath.startsWith("file:///"))
+					sharedFilePath = sharedFilePath.substring(7);
+
 				if (eventSink != null) {
 					Map<String, String> params = new HashMap<>();
 					params.put(TYPE, type);
 					params.put(PATH, sharedUri.toString());
+					params.put(FILEPATH, sharedFilePath);
 					if (!TextUtils.isEmpty(sharedTitle)) {
 						params.put(TITLE, sharedTitle);
 					}

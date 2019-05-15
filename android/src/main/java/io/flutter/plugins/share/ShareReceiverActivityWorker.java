@@ -14,9 +14,9 @@ import io.flutter.app.FlutterActivity;
  */
 public class ShareReceiverActivityWorker extends FlutterActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
 		// Get intent, action and MIME type
 		Intent intent = getIntent();
@@ -27,10 +27,9 @@ public class ShareReceiverActivityWorker extends FlutterActivity {
 		} else {
 			finish();
 		}
+	}
 
-    }
-
-    public void passShareToMainActivity(Intent intent) {
+	public void passShareToMainActivity(Intent intent) {
     	Intent launchIntent = getPackageManager().getLaunchIntentForPackage(getPackageName());
 		launchIntent.setAction(intent.getAction());
     	launchIntent.setType(intent.getType());
