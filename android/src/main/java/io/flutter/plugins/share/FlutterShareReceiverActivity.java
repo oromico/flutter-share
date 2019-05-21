@@ -137,12 +137,14 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 				Log.i(getClass().getSimpleName(), "@-> Obtained title and extension ");
 
 				File cacheDir = getCacheDir();
+				String outputFilePath = "";
 
 				try {
 					InputStream inputStream = getContentResolver().openInputStream(uri);
 
 					File outputFile = File.createTempFile(sharedTitle, fileExtension, cacheDir);
 					Log.i(getClass().getSimpleName(), "@-> Created files/fileDir objects ");
+					outputFilePath = outputFile.getAbsolutePath();
 					Log.i(getClass().getSimpleName(), "@-> outputfile is " + outputFile.getAbsolutePath());
 					OutputStream outStream = new FileOutputStream(outputFile);
 					byte[] buffer = new byte[8 * 1024];
@@ -170,7 +172,7 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 					Map<String, String> params = new HashMap<>();
 					params.put(TYPE, type);
 					params.put(PATH, uri.toString());
-					params.put(FILEPATH, "");
+					params.put(FILEPATH, outputFilePath);
 					if (!TextUtils.isEmpty(sharedTitle)) {
 						params.put(TITLE, sharedTitle);
 					}

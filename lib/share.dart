@@ -108,7 +108,6 @@ class Share {
        this.filePath = '',
        this.path = '';
 
-
   static Share fromReceived(Map received) {
     assert(received.containsKey(TYPE));
     ShareType type = ShareType.fromMimeType(received[TYPE]);
@@ -229,7 +228,7 @@ class Share {
 
   @override
   String toString() {
-    return 'Share{' + (this.isNull ? 'null }' : 'mimeType: $mimeType, title: $title, text: $text, path: $path, shares: $shares}');
+    return 'Share{' + (this.isNull ? 'null }' : 'mimeType: $mimeType, title: $title, text: $text, path: $path, shares: $shares, androidAbsolutePath: $filePath}');
   }
 
 }
