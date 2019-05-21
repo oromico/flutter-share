@@ -29,6 +29,7 @@ public class SharePlugin implements MethodChannel.MethodCallHandler {
 	public static final  String TEXT        = "text";
 	public static final  String PATH        = "path";
 	public static final  String TYPE        = "type";
+	public static final  String FILEPATH    = "filePath";
 	public static final  String IS_MULTIPLE = "is_multiple";
 
 	public static enum ShareType{

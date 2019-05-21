@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -18,6 +22,7 @@ import io.flutter.plugin.common.EventChannel;
 
 import static io.flutter.plugins.share.SharePlugin.IS_MULTIPLE;
 import static io.flutter.plugins.share.SharePlugin.PATH;
+import static io.flutter.plugins.share.SharePlugin.FILEPATH;
 import static io.flutter.plugins.share.SharePlugin.TEXT;
 import static io.flutter.plugins.share.SharePlugin.TITLE;
 import static io.flutter.plugins.share.SharePlugin.TYPE;
@@ -85,6 +90,17 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 		handleIntent(intent);
 	}
 
+	// public File getCacheDirectory() {
+	// 	File cacheDir = context.getCacheDir();
+	// 	if (cacheDir == null) {
+	// 		return null;
+	// 	}
+	// 	if (diskCacheName != null) { 
+	// 		return new File(cacheDir, diskCacheName);
+	// 	}
+	// 	return cacheDir;
+	// }
+
 	public void handleIntent(Intent intent) {
 		// Get intent, action and MIME type
 		String action = intent.getAction();
@@ -102,7 +118,6 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 					Map<String, String> params = new HashMap<>();
 					params.put(TYPE, type);
 					params.put(TEXT, sharedText);
-					params.put(FILE, data);
 					if (!TextUtils.isEmpty(sharedTitle)) {
 						params.put(TITLE, sharedTitle);
 					}
@@ -113,19 +128,49 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 			
 			// Handler for all other types
 			} else {
+				// File file = new File(intent.getData().getPath());
+				Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
 				String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
+				String fileExtension = sharedTitle.substring(sharedTitle.lastIndexOf('.'));
+
+				Log.i(getClass().getSimpleName(), "@-> Obtained title and extension ");
+
+				File cacheDir = getCacheDir();
+
+				try {
+					InputStream inputStream = getContentResolver().openInputStream(uri);
+
+					File outputFile = File.createTempFile(sharedTitle, fileExtension, cacheDir);
+					Log.i(getClass().getSimpleName(), "@-> Created files/fileDir objects ");
+					Log.i(getClass().getSimpleName(), "@-> outputfile is " + outputFile.getAbsolutePath());
+					OutputStream outStream = new FileOutputStream(outputFile);
+					byte[] buffer = new byte[8 * 1024];
+					int bytesRead;
+
+					while ((bytesRead = inputStream.read(buffer)) != -1) {
+						outStream.write(buffer, 0, bytesRead);
+					}
+
+					Log.i(getClass().getSimpleName(), "@-> Closing Streams ");
+
+					inputStream.close();
+					outStream.close();
+					Log.i(getClass().getSimpleName(), "@-> Written File! ");
+
+				} catch(Exception e) {
+					Log.i(getClass().getSimpleName(), "writing shared file errored" + uri.toString());
+				}
+
 				Log.i(getClass().getSimpleName(), "receiving shared title: " + sharedTitle);
-				Uri sharedUri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
-				Log.i(getClass().getSimpleName(), "receiving shared file: " + sharedUri);
-				String sharedFilePath = intent.getData().toString();
-				if (sharedFilePath.startsWith("file:///"))
-					sharedFilePath = sharedFilePath.substring(7);
+
+				Log.i(getClass().getSimpleName(), "receiving shared file: " + uri.toString());
 
 				if (eventSink != null) {
 					Map<String, String> params = new HashMap<>();
 					params.put(TYPE, type);
-					params.put(PATH, sharedUri.toString());
-					params.put(FILEPATH, sharedFilePath);
+					params.put(PATH, uri.toString());
+					params.put(FILEPATH, "");
 					if (!TextUtils.isEmpty(sharedTitle)) {
 						params.put(TITLE, sharedTitle);
 					}

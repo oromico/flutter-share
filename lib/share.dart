@@ -47,6 +47,7 @@ class ShareType {
 class Share {
 
   static const String TITLE = "title";
+  static const String FILEPATH = "filePath";
   static const String TEXT = "text";
   static const String PATH = "path";
   static const String TYPE = "type";
@@ -56,6 +57,7 @@ class Share {
   final String title;
   final String text;
   final String path;
+  final String filePath;
   final List<Share> shares;
 
   Share.nullType() :
@@ -63,6 +65,7 @@ class Share {
     this.title = '',
     this.text = '',
     this.path = '',
+    this.filePath = '',
     this.shares = const[]
   ;
 
@@ -72,12 +75,14 @@ class Share {
   }) : assert(text != null),
        this.mimeType = ShareType.TYPE_PLAIN_TEXT,
        this.path = '',
+       this.filePath = '',
        this.shares = const[];
 
   const Share.file({
     this.mimeType = ShareType.TYPE_FILE,
     this.title,
     this.path,
+    this.filePath,
     this.text = ''
   }) : assert(mimeType != null),
        assert(path != null),
@@ -86,6 +91,7 @@ class Share {
   const Share.image({
     this.mimeType = ShareType.TYPE_IMAGE,
     this.title,
+    this.filePath,
     this.path,
     this.text = ''
   }) : assert(mimeType != null),
@@ -99,6 +105,7 @@ class Share {
   }) : assert(mimeType != null),
        assert(shares != null),
        this.text = '',
+       this.filePath = '',
        this.path = '';
 
 
@@ -137,6 +144,7 @@ class Share {
           if (received.containsKey(TEXT)) {
             return Share.image(path: received[PATH],
                 title: received[TITLE],
+                filePath: received[FILEPATH],
                 text: received[TEXT]);
           } else {
             return Share.image(path: received[PATH], text: received[TITLE]);
@@ -151,6 +159,7 @@ class Share {
           if (received.containsKey(TEXT)) {
             return Share.file(path: received[PATH],
                 title: received[TITLE],
+                filePath: received[FILEPATH],
                 text: received[TEXT]);
           } else {
             return Share.file(path: received[PATH], text: received[TITLE]);
