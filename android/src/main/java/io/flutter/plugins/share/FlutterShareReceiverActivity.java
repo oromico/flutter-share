@@ -28,8 +28,8 @@ import static io.flutter.plugins.share.SharePlugin.TITLE;
 import static io.flutter.plugins.share.SharePlugin.TYPE;
 
 /**
- * main activity super, handles eventChannel sink creation
- * 					, share intent parsing and redirecting to eventChannel sink stream
+ * main activity super, handles eventChannel sink creation , share intent
+ * parsing and redirecting to eventChannel sink stream
  *
  * @author Duarte Silveira
  * @version 1
@@ -40,9 +40,9 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 	public static final String STREAM = "plugins.flutter.io/receiveshare";
 
 	private EventChannel.EventSink eventSink = null;
-	private boolean                inited    = false;
-	private List<Intent>           backlog   = new ArrayList<>();
-	private boolean                ignoring  = false;
+	private boolean inited = false;
+	private List<Intent> backlog = new ArrayList<>();
+	private boolean ignoring = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -91,14 +91,14 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 	}
 
 	// public File getCacheDirectory() {
-	// 	File cacheDir = context.getCacheDir();
-	// 	if (cacheDir == null) {
-	// 		return null;
-	// 	}
-	// 	if (diskCacheName != null) { 
-	// 		return new File(cacheDir, diskCacheName);
-	// 	}
-	// 	return cacheDir;
+	// File cacheDir = context.getCacheDir();
+	// if (cacheDir == null) {
+	// return null;
+	// }
+	// if (diskCacheName != null) {
+	// return new File(cacheDir, diskCacheName);
+	// }
+	// return cacheDir;
 	// }
 
 	public void handleIntent(Intent intent) {
@@ -107,7 +107,7 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 		String type = intent.getType();
 
 		if (Intent.ACTION_SEND.equals(action) && type != null) {
-			
+
 			// Handler for text/plain types
 			if ("text/plain".equals(type)) {
 				String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
@@ -125,13 +125,23 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 				} else if (!ignoring && !backlog.contains(intent)) {
 					backlog.add(intent);
 				}
-			
-			// Handler for all other types
+
+				// Handler for all other types
 			} else {
 				// File file = new File(intent.getData().getPath());
 				Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
 
 				String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
+				if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
+				
+				if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TEXT);
+
+				if (sharedTitle == null) sharedTitle = uri.toString().substring(uri.toString().lastIndexOf("%2F")).replaceAll("\\\\/", "-").replace("%2F", "");
+
+				if (sharedTitle == null) sharedTitle = "Shared.zip";
+
+
+
 				String fileExtension = sharedTitle.substring(sharedTitle.lastIndexOf('.'));
 
 				Log.i(getClass().getSimpleName(), "@-> Obtained title and extension ");
@@ -160,7 +170,7 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 					outStream.close();
 					Log.i(getClass().getSimpleName(), "@-> Written File! ");
 
-				} catch(Exception e) {
+				} catch (Exception e) {
 					Log.i(getClass().getSimpleName(), "writing shared file errored" + uri.toString());
 				}
 
