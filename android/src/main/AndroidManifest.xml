@@ -3,7 +3,7 @@
     <application>
         <activity android:name="io.flutter.plugins.share.ShareReceiverActivityWorker"
           android:theme="@style/Theme.Transparent">
-            <intent-filter>
+            <!-- <intent-filter>
                 <action android:name="android.intent.action.SEND"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="text/plain"/>
@@ -17,7 +17,7 @@
                 <action android:name="android.intent.action.SEND_MULTIPLE"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <data android:mimeType="*/*"/>
-            </intent-filter>
+            </intent-filter> -->
         </activity>
     </application>
 </manifest>
