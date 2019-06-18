@@ -1,12 +1,10 @@
 package io.flutter.plugins.share;
 
 import android.content.Context;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
@@ -134,14 +132,6 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 				int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
 				Log.i(getClass().getSimpleName(), "@-> nameindex: " + String.valueOf(nameIndex));
 				cursor.moveToFirst();
-
-				// Title
-				// String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
-				// if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
-				// if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TEXT);
-				// if (sharedTitle == null) {
-				// 	sharedTitle = uri.toString().substring(uri.toString().lastIndexOf("%2F")).replaceAll("\\\\/", "-").replace("%2F", "");
-				// }
 				String sharedTitle = cursor.getString(nameIndex);
 				if (sharedTitle == null) sharedTitle = "Shared.zip";
 
