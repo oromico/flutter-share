@@ -1,9 +1,13 @@
 package io.flutter.plugins.share;
 
 import android.content.Context;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -12,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -90,17 +95,6 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 		handleIntent(intent);
 	}
 
-	// public File getCacheDirectory() {
-	// File cacheDir = context.getCacheDir();
-	// if (cacheDir == null) {
-	// return null;
-	// }
-	// if (diskCacheName != null) {
-	// return new File(cacheDir, diskCacheName);
-	// }
-	// return cacheDir;
-	// }
-
 	public void handleIntent(Intent intent) {
 		// Get intent, action and MIME type
 		String action = intent.getAction();
@@ -128,26 +122,44 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 
 				// Handler for all other types
 			} else {
-				// File file = new File(intent.getData().getPath());
+				// URI
 				Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+				if (uri == null) {
+					Log.e(getClass().getSimpleName(), "@-> !!! URI is NULL");
+					return;
+				}
+				Log.i(getClass().getSimpleName(), "@-> uri: "+ uri.toString());
 
-				String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
-				if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
-				
-				if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TEXT);
+				Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+				int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+				Log.i(getClass().getSimpleName(), "@-> nameindex: " + String.valueOf(nameIndex));
+				cursor.moveToFirst();
 
-				if (sharedTitle == null) sharedTitle = uri.toString().substring(uri.toString().lastIndexOf("%2F")).replaceAll("\\\\/", "-").replace("%2F", "");
-
+				// Title
+				// String sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
+				// if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE);
+				// if (sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_TEXT);
+				// if (sharedTitle == null) {
+				// 	sharedTitle = uri.toString().substring(uri.toString().lastIndexOf("%2F")).replaceAll("\\\\/", "-").replace("%2F", "");
+				// }
+				String sharedTitle = cursor.getString(nameIndex);
 				if (sharedTitle == null) sharedTitle = "Shared.zip";
 
-
-
-				String fileExtension = sharedTitle.substring(sharedTitle.lastIndexOf('.'));
-
-				Log.i(getClass().getSimpleName(), "@-> Obtained title and extension ");
+				// File type
+				String mimeType = intent.getType();
+				String fileExtension = "zip";
+				if (mimeType == "application/pdf") {
+					fileExtension = "pdf";
+				} else if (mimeType == "*/*") {
+					int indexOfDot = sharedTitle.lastIndexOf(".");
+					if (indexOfDot > 0) {
+						fileExtension = sharedTitle.substring(indexOfDot + 1);
+					}
+				}
 
 				File cacheDir = getCacheDir();
 				String outputFilePath = "";
+				Log.i(getClass().getSimpleName(), "@-> Title: "+sharedTitle+", fileExt: "+fileExtension);
 
 				try {
 					InputStream inputStream = getContentResolver().openInputStream(uri);
