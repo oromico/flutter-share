@@ -18,6 +18,7 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -122,6 +123,11 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 			} else {
 				// URI
 				Uri uri = intent.getParcelableExtra(Intent.EXTRA_STREAM);
+
+				if (uri == null) {
+					uri = intent.getData();
+				}
+
 				if (uri == null) {
 					Log.e(getClass().getSimpleName(), "@-> !!! URI is NULL");
 					return;
@@ -129,11 +135,18 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 				Log.i(getClass().getSimpleName(), "@-> uri: "+ uri.toString());
 
 				Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-				int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-				Log.i(getClass().getSimpleName(), "@-> nameindex: " + String.valueOf(nameIndex));
-				cursor.moveToFirst();
-				String sharedTitle = cursor.getString(nameIndex);
-				if (sharedTitle == null) sharedTitle = "Shared.zip";
+				String sharedTitle = "";
+
+				if (cursor != null) {
+					int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+					Log.i(getClass().getSimpleName(), "@-> nameindex: " + String.valueOf(nameIndex));
+					cursor.moveToFirst();
+					sharedTitle = cursor.getString(nameIndex);
+				}
+
+				if (sharedTitle == "" || sharedTitle == null) sharedTitle = intent.getStringExtra(Intent.EXTRA_SUBJECT);
+
+				if (sharedTitle == "" || sharedTitle == null) sharedTitle = "Shared.zip";
 
 				// File type
 				String mimeType = intent.getType();
@@ -152,26 +165,30 @@ public class FlutterShareReceiverActivity extends FlutterActivity {
 				Log.i(getClass().getSimpleName(), "@-> Title: "+sharedTitle+", fileExt: "+fileExtension);
 
 				try {
-					InputStream inputStream = getContentResolver().openInputStream(uri);
+					if (uri != null && uri.toString().startsWith("file://")) {
+						outputFilePath = uri.toString();
 
-					File outputFile = File.createTempFile(sharedTitle, fileExtension, cacheDir);
-					Log.i(getClass().getSimpleName(), "@-> Created files/fileDir objects ");
-					outputFilePath = outputFile.getAbsolutePath();
-					Log.i(getClass().getSimpleName(), "@-> outputfile is " + outputFile.getAbsolutePath());
-					OutputStream outStream = new FileOutputStream(outputFile);
-					byte[] buffer = new byte[8 * 1024];
-					int bytesRead;
+					} else if (uri != null && uri.toString().startsWith("content://")) {
+						InputStream inputStream = getContentResolver().openInputStream(uri);
 
-					while ((bytesRead = inputStream.read(buffer)) != -1) {
-						outStream.write(buffer, 0, bytesRead);
+						File outputFile = File.createTempFile(sharedTitle, fileExtension, cacheDir);
+						Log.i(getClass().getSimpleName(), "@-> Created files/fileDir objects ");
+
+						outputFilePath = outputFile.getAbsolutePath();
+						Log.i(getClass().getSimpleName(), "@-> outputfile is " + outputFilePath);
+
+						OutputStream outStream = new FileOutputStream(outputFile);
+						byte[] buffer = new byte[8 * 1024];
+						int bytesRead;
+
+						while ((bytesRead = inputStream.read(buffer)) != -1) {
+							outStream.write(buffer, 0, bytesRead);
+						}
+
+						inputStream.close();
+						outStream.close();
+						Log.i(getClass().getSimpleName(), "@-> Written File! ");
 					}
-
-					Log.i(getClass().getSimpleName(), "@-> Closing Streams ");
-
-					inputStream.close();
-					outStream.close();
-					Log.i(getClass().getSimpleName(), "@-> Written File! ");
-
 				} catch (Exception e) {
 					Log.i(getClass().getSimpleName(), "writing shared file errored" + uri.toString());
 				}
