@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 
-import io.flutter.app.FlutterActivity;
+import io.flutter.app.FlutterFragmentActivity;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.EventChannel;
 
@@ -39,7 +39,7 @@ import static io.flutter.plugins.share.SharePlugin.TYPE;
  * @version 1
  * @since 25/05/18
  */
-public class FlutterShareReceiverActivity extends FlutterActivity {
+public class FlutterShareReceiverActivity extends FlutterFragmentActivity {
 
 	public static final String STREAM = "plugins.flutter.io/receiveshare";
 
